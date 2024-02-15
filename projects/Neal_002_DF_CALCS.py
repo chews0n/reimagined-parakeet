@@ -27,6 +27,20 @@ df['month'] = df['begin_datetime_mpt'].dt.month  # Or use another timestamp colu
 
 print(df.head())
 
+# CSV Export ------------------------------------------------------------
+output_folder = "../data/interim/"  # Go back one folder, then into 'data/raw'
+output_filename = "SystemMarginalPrice_6M0_ADDCOLS.csv"
+output_path = os.path.join(output_folder, output_filename)
+
+# Ensure the output folder exists, its a new interim one
+os.makedirs(output_folder, exist_ok=True)
+
+df.to_csv(output_path, index=False)  # Save CSV without index column
+print(f'File output to {output_path}')
+
+# Create the Plotly figure for Volume Trend------------------------------
+fig = px.line(df, x='begin_datetime_mpt', y='volume', title='Volume Trend')
+
 # Create the Plotly figure for Volume Trend------------------------------
 fig = px.line(df, x='begin_datetime_mpt', y='rate_per_hour', title='Volume Trend')
 
@@ -49,7 +63,7 @@ fig.update_layout(
 
 fig.show()
 
-# Create the Plotly figure For Price
+# Create the Plotly figure For Cost
 fig = px.line(df, x='begin_datetime_mpt', y='cost', title='Cost Trend')
 
 # Customize (optional)
