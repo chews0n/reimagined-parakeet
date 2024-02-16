@@ -4,12 +4,12 @@ import requests
 class AESOfetcher:
     """A class for fetching data from the AESO API using API calls"""
 
-    def __init__(self, api_key, base_url):
+    def __init__(self, api_key, base_url, accept_type='application/json'):
         """Initialize the AESOfetcher instance"""
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {
-            'Accept': 'application/json',
+            'Accept': accept_type,
             'X-API-Key': self.api_key
         }
     
