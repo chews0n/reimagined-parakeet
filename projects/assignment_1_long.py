@@ -3,35 +3,49 @@ import os
 import requests
 import json
 
-# load env variable
+# Load environment variables from a .env file
 load_dotenv()
 
-# get the API key from env var
+# Get the API key
 API_KEY = os.getenv('AESO_API_KEY')
 
-url = 'https://api.aeso.ca/report/v1.1/price/poolPrice'
+class AESOfetcher:
+    """A class for fetching data from the AESO API using API calls"""
 
-# Define headers
-headers = {
-    'Accept': 'application/json',
-    'X-API-Key': API_KEY
-}
+    def __init__(self, api_key):
+        """Initialize the AESOfetcher instance"""
+        self.api_key = api_key
+        self.base_url = 'https://api.aeso.ca/report'
+        self.headers = {
+            'Accept': 'application/json',
+            'X-API-Key': self.api_key
+        }
+    
+    def fetch_data(self, dataset, params=None):
+        """A method to fetch data from a specific dataset.
 
-# Define the parameters
-params = {
-    'startDate': '2020-01-01',
-    'endDate': ''
-}
+        dataset: The specific dataset to fetch from the AESO API.
+        params: An optional dictionary of parameters for the query (e.g. startDate).
+        """
+        try:
+            url = f"{self.base_url}/{dataset}"
+            response = requests.get(url, headers=self.headers, params=params)
+            response.raise_for_status()     # This will raise an HTTPError for bad responses
+            return response.json(), response.status_code
+        except requests.RequestException as e:
+            print(f"Error fetching  data: {e}")
+            return None, getattr(e.response, 'status_code', 0)
 
-# API GET request
-r = requests.get(url,headers=headers, params=params)
+# Create an instance of the AESOfetcher with the API key
+fetcher = AESOfetcher(api_key=API_KEY)
 
-# Parse to a dictionary
-response_dict = r.json()
+# Try fetching Actual Forecast for a specific date range
+actual_forecast_data, status_code = fetcher.fetch_data('v1/load/albertaInternalLoad', 
+                                        {'startDate':'2015-01-01', 'endDate':'2016-01-01'})
+print(actual_forecast_data.keys())
+print(f"Status Code: {status_code}")
 
-# Check the server response code
-print(r.status_code)
-
-# Check the keys in the data
-print(response_dict.keys())
-print(response_dict)
+# Try fetching Current Supply Demand
+current_supply_demand, status_code = fetcher.fetch_data('v1/csd/summary/current')
+print(f"Status Code: {status_code}")
+print(current_supply_demand.keys())
