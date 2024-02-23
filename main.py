@@ -1,7 +1,7 @@
 import sys
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
 from scrape.aeso_scraper import AESOfetcher
-
+from scrape.weather_canada import DownloadWeatherData
 
 def main() -> int:
 	# Create an instance of the AESOfetcher with the API key
@@ -41,6 +41,8 @@ def main() -> int:
 	# print(current_supply_demand.keys())
 
 	# TODO: Add a pull down for environment canada weather data
+	weather_data_downloader = DownloadWeatherData(start_year=2020)
+	weather_data_downloader.download_data()
 
 	# TODO: Pull down natural gas prices
 
