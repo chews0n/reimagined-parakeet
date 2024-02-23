@@ -40,6 +40,12 @@ def main() -> int:
 	# 	print(f"Status Code: {status_code}")
 	# print(current_supply_demand.keys())
 
+	# TODO: Add a pull down for environment canada weather data
+
+	# TODO: Pull down natural gas prices
+
+	# TODO: Pull down public holidays for Alberta
+
 	return 0
 
 
