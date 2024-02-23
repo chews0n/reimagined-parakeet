@@ -42,6 +42,8 @@ def main() -> int:
 		# Export to a CSV file
 		df.to_csv(full_path, index=False)
 		print(f"File succesfully saved to {full_path}")
+
+	return 0
 	
 if __name__ == '__main__':
 	sys.exit(main())  # next section explains the use of sys.exit
