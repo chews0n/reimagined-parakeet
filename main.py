@@ -40,7 +40,6 @@ def main() -> int:
 	# 	print(f"Status Code: {status_code}")
 	# print(current_supply_demand.keys())
 
-	# TODO: Add a pull down for environment canada weather data
 	weather_data_downloader = DownloadWeatherData(start_year=2020)
 	weather_data_downloader.download_data()
 
