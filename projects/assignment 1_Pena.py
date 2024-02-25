@@ -4,6 +4,7 @@ import json
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, CALGARY_API_URL
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
+from scrape.public_holiday import Fetch_Public_Holidays
 
 # No need to copy/paste the class and constants into here, that's what imports are for
 
@@ -48,3 +49,13 @@ print(pool_price_rep.keys())
 # This will download the weather data into
 weather_data = DownloadWeatherData()
 weather_data.download_data()
+
+#This will create an instance of the Public Holiday fetcher
+PH_fetcher = Fetch_Public_Holidays(base_url=PUBLIC_HOLIDAY_URL)
+
+# This will fetch the data, provided year and country
+PH_data = PH_fetcher.fetch_data('2024','CA')
+
+for public_holiday in public_holidays:
+  print(public_holiday['date'], public_holiday['name'], public_holiday['types'])
+
