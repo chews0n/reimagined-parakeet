@@ -2,8 +2,8 @@ import requests
 import pandas as pd
 import sys
 import os 
-# from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
 
+#from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
 BASE_URL='https://api.aeso.ca/report'
 CURRENT_SUPPLY_DEMAND_URL='v1/csd/summary/current'
 INTERNAL_LOAD_URL='v1/load/albertaInternalLoad'
@@ -55,8 +55,14 @@ class AESO_dataScrape:
         # Convert the JSON data to a pandas DataFrame
         df = pd.DataFrame(data['return'][report_type])
 
+        # Define the folder and filename 
+        folder_path = "data/raw"
+        file_name = output_csv_file
+        full_path = f"{folder_path}/{file_name}"
+        
         # Write the DataFrame to a CSV file
-        df.to_csv(output_csv_file, index=False)
+        df.to_csv(full_path, index=False)
+        print(f"File succesfully saved to {full_path}")
 
         return df
 
@@ -70,3 +76,4 @@ df = report.fetch_and_write_tocsv('pool_price_report', 2001 )
 
 # Print the DataFrame
 print(df)
+

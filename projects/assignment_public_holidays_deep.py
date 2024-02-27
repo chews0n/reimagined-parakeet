@@ -32,14 +32,14 @@ class PublicHolidays:
         df = pd.DataFrame(response.json())
 
         # Write the Dataframe to a csv file
-        df.to_csv(output_file, index = False)
+        df.to_csv(f'data/raw/{output_file}', index = False)
 
         return df
 
 # Create an instance of the class for Canada
 holidays = PublicHolidays('ca')
 
-# Get public holidays data for the year - 2022
+# Get public holidays data for the year - 2023
 df = holidays.get_data(2023)
 
 # Print the DataFrame
