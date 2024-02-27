@@ -9,7 +9,7 @@ class NaturalGasPrices:
     def get_data(self):
         try:
             # Send HTTP request to the URL
-            response = requests.get(url)
+            response = requests.get(self.url)
             response.raise_for_status()  # Raise an exception if the request was unsuccessful
 
             # Save the content to a file
@@ -34,7 +34,6 @@ class NaturalGasPrices:
             print(f"An error occurred while trying to get the data: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")# Send HTTP request to the URL
-        response = requests.get(url)
 
 
 
