@@ -65,8 +65,8 @@ report = AESO_dataScrape(API_KEY)
 
 # Fetch the required data_report for the required year and write it to a CSV file
 # choose 'actual_forecast_report' or 'pool_price_report' and year
-df = report.fetch_and_write_tocsv('actual_Forecast_report',2001)
-df = report.fetch_and_write_tocsv('pool_price_report', 2001 )
+df = report.fetch_and_write_tocsv('actual_Forecast_report',2020)
+df = report.fetch_and_write_tocsv('pool_price_report', 2020 )
 
 # Print the DataFrame
 print(df)
