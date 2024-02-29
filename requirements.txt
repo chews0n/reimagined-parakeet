@@ -1,0 +1,20 @@
+numpy  # Fundamental numerical computation
+pandas  # Data manipulation and analysis
+matplotlib  # Visualization 
+scikit-learn  # Machine learning algorithms
+scipy  # Scientific computing tools 
+statsmodels # Statistical modeling
+seaborn  # Advanced visualization based on matplotlib
+requests  # For making HTTP requests to fetch data from APIs
+beautifulsoup4 # For parsing HTML and XML data
+nltk  # Natural language processing toolkit
+# API connections
+requests-oauthlib  # For handling OAuth authentication if needed
+
+# Time-series analysis
+pandas-datareader  # For fetching data from various financial data sources
+prophet  # For time series forecasting (developed by Facebook)
+
+# Advanced plotting
+plotly
+cufflinks  # Connects Plotly with Pandas for interactive timeseries plots
