@@ -14,6 +14,9 @@ class Fetch_Public_Holidays:
     def __init__(self, base_url):
         """Initialize the Public Holiday fetcher instance"""
         self.base_url = base_url
+        self.public_holidays = list()
+        self.alberta_holidays = list()
+        self.ab_county_name = 'CA-AB'
 
     def fetch_data(self,year,country):
         """A method to fetch a list of public holidays from a specific year and country.
@@ -23,4 +26,14 @@ class Fetch_Public_Holidays:
         """
         url = f"{self.base_url}/{year}/{country}"
         response = requests.get(url)
-        public_holidays = json.loads(response.content)
+        self.public_holidays = json.loads(response.content)
+
+    def filter_out_alberta_holidays(self):
+
+        for holidays in self.public_holidays:
+            if holidays['counties'] is None:
+                self.alberta_holidays.append(holidays)
+            else:
+                for counties in holidays['counties']:
+                    if counties == self.ab_county_name:
+                        self.alberta_holidays.append(holidays)

@@ -1,7 +1,8 @@
 import requests
 import json
 
-from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, CALGARY_API_URL
+from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, \
+	CALGARY_API_URL, PUBLIC_HOLIDAY_URL
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
 from scrape.public_holiday import Fetch_Public_Holidays
@@ -54,8 +55,10 @@ weather_data.download_data()
 PH_fetcher = Fetch_Public_Holidays(base_url=PUBLIC_HOLIDAY_URL)
 
 # This will fetch the data, provided year and country
-PH_data = PH_fetcher.fetch_data('2024','CA')
+PH_fetcher.fetch_data('2024','CA')
 
-for public_holiday in public_holidays:
-  print(public_holiday['date'], public_holiday['name'], public_holiday['types'])
+PH_fetcher.filter_out_alberta_holidays()
+
+for public_holiday in PH_fetcher.alberta_holidays:
+	print(public_holiday['date'], public_holiday['name'], public_holiday['types'])
 
