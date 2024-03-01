@@ -14,6 +14,7 @@
 5. If we have city granular energy use for Calgary, then we can use said usage and weather for the city. 
    1. Public holidays (https://date.nager.at/Api) - binary or classification - do different holidays have more impact?
    2. natural gas prices (https://www.eia.gov/opendata/) (https://github.com/gavram/Henry-Hub-Gas-Prices/blob/master/daily.py)
+   ![image](eia_api.png)
    3. big events (maybe??) - like stampede - check if there is an impact first before including it as a feature 
    4. weather (https://api.weather.gc.ca/) - wind and solar rely on the weather - amount of sunshine/amount of wind impact generation - have to look at locale of generation though
    5. length of daylight (sunrise/sunset) - this is intrinsic with date
