@@ -18,7 +18,7 @@ class Fetch_Public_Holidays:
         self.alberta_holidays = list()
         self.ab_county_name = 'CA-AB'
 
-    def fetch_data(self,year,country):
+    def fetch_data(self, year, country):
         """A method to fetch a list of public holidays from a specific year and country.
 
         year: Use string format in numbers.
