@@ -2,6 +2,7 @@ import sys
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
+from scrape.aeso_merger import AESOmerger
 
 def main() -> int:
 	# Create an instance of the AESOfetcher with the API key
@@ -36,6 +37,11 @@ def main() -> int:
     # Loop through the years and save data, now encapsulated in the AESOfetcher class
 	fetcher.fetch_and_save_data(2003, 2024, INTERNAL_LOAD_URL, folder_path,  file_prefix="albertaInternalLoad")
 	fetcher.fetch_and_save_data(2003, 2024, POOL_PRICE_REPORT, folder_path,  file_prefix="poolPrice")
+
+	# Create an instance of the AESOmerger and merge all CSV files 
+	merger = AESOmerger("data/raw")
+	merger.merge_aeso_files("albertaInternalLoad", 2003, 2023, "data/raw/merged_albertaInternalLoad.csv")
+	merger.merge_aeso_files("poolPrice", 2003, 2023, "data/raw/merged_poolPrice.csv")
 
 	# Try fetching Current Supply Demand
 	# current_supply_demand, status_code = fetcher.fetch_data(CURRENT_SUPPLY_DEMAND_URL)
