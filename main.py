@@ -30,6 +30,13 @@ def main() -> int:
 
 	print(f"Total Load for 2015: {load_sum}")
 
+	# Define the folder path where files will be saved
+	folder_path = "data/raw"
+
+    # Loop through the years and save data, now encapsulated in the AESOfetcher class
+	fetcher.fetch_and_save_data(2003, 2024, INTERNAL_LOAD_URL, folder_path,  file_prefix="albertaInternalLoad")
+	fetcher.fetch_and_save_data(2003, 2024, POOL_PRICE_REPORT, folder_path,  file_prefix="poolPrice")
+
 	# Try fetching Current Supply Demand
 	# current_supply_demand, status_code = fetcher.fetch_data(CURRENT_SUPPLY_DEMAND_URL)
 	# if status_code == -1:
