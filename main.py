@@ -30,6 +30,22 @@ def main() -> int:
 
 	print(f"Total Load for 2015: {load_sum}")
 
+
+	# Fetch Alberta Internal Load data for all years
+	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, 2003, 2023)
+
+	# Fetch Pool Price data for all years
+	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023)
+
+	# Testing: Print first 5 entries of the Alberta Internal Load data
+	print("First 5 entries of Alberta Internal Load data:")
+	print(internal_load_data[:5])
+
+	# Testing: Print first 5 entries of the Pool Price data
+	print("\nFirst 5 entries of Pool Price data:")
+	print(pool_price_data[:5])
+
+
 	# Try fetching Current Supply Demand
 	# current_supply_demand, status_code = fetcher.fetch_data(CURRENT_SUPPLY_DEMAND_URL)
 	# if status_code == -1:
