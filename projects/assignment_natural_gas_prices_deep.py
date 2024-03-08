@@ -39,14 +39,15 @@ class NaturalGasPrices:
 
 
         # Print the first few rows of the DataFrame
-        print(df.head())
-        print(len(df))
-        print(df.Date.max(), df.Date.min())
+        # print(df.head())
+        # print(len(df))
+        # print(df.Date.max(), df.Date.min())
 
 
 # main part of the code
 # URL of the dataset
-url = 'https://datahub.io/vara.maruboina/henry-hub-natural-gas-spot-price/r/0.csv'
+#url = 'https://datahub.io/vara.maruboina/henry-hub-natural-gas-spot-price/r/0.csv'
+url = 'https://api.eia.gov/v2/natural-gas/pri/fut/data/?frequency=daily&data[0]=value&start=2000-01-01&end=2001-01-01&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000'
 
 # constructor of the class
 natgas = NaturalGasPrices(url)
