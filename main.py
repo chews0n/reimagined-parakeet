@@ -1,4 +1,7 @@
 import sys
+
+import pandas as pd
+
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
@@ -32,10 +35,22 @@ def main() -> int:
 
 
 	# Fetch Alberta Internal Load data for all years
-	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, 2003, 2023)
+	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, 2003, 2023, ["alberta_internal_load"])
 
 	# Fetch Pool Price data for all years
-	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023)
+	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023, ["pool_price", "rolling_30day_avg"])
+
+	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
+	feature_list = pd.DataFrame()
+
+	# your feature list will look something like the chart below...
+	# Date || alberta_internal_load || pool_price || rolling_30day_avg -> for the headers
+	# 2003-01-01 || 98375 || 23.43 || 65.3 --> this will be one row entry
+	# ... repeat that for the remaining 20 years
+
+	# check if the dataframe contains nan values
+	# check if all of the dates are present
+	# check for data that is out of range, if you pull down a temperature was +500*C
 
 	# Testing: Print first 5 entries of the Alberta Internal Load data
 	print("First 5 entries of Alberta Internal Load data:")

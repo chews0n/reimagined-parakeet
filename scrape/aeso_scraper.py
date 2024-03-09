@@ -28,7 +28,7 @@ class AESOfetcher:
             print(f"Error fetching  data: {e}")
             return None, getattr(e.response, 'status_code', -1)
 
-    def fetch_data_all_years(self, dataset, start_year, end_year):
+    def fetch_data_all_years(self, dataset, start_year, end_year, headers):
         """A method to fetch data all years in the specified range and store it in memory. 
         This will return a list of dictionaries.
         
@@ -38,10 +38,12 @@ class AESOfetcher:
         """
 
         # Create an empty list for fetched data
-        combined_data = []
+        combined_data = [[] for i in range(len(headers)+1)]
 
         # Iterate over each year in the range
         for year in range(start_year, end_year+1):
+            current_date = f"{year}-01-01"
+
             startDate = f"{year}-01-01"
             endDate = f"{year}-12-31"
             params = {'startDate': startDate, 'endDate': endDate}
@@ -59,8 +61,29 @@ class AESOfetcher:
                 yearly_data = response_data.get('return',{}).get('Actual Forecast Report',[])
             elif dataset.endswith('poolPrice'):
                 yearly_data = response_data.get('return',{}).get('Pool Price Report',[])
-            
-            # Append the yearly data to the list
-            combined_data.extend(yearly_data)
+
+            tmp = [0.0] * len(headers)
+            entry_count = 0
+
+            for entry in yearly_data:
+                if (entry["begin_datetime_mpt"].split(" ")[0] == current_date):
+                    # Average over dailies
+                    entry_count += 1
+                    for idx, header in enumerate(headers):
+                        tmp[idx] += float(entry[header])
+
+                else:
+                    combined_data[0].append(current_date)
+                    for idx, header in enumerate(headers):
+                        combined_data[idx+1].append(tmp[idx]/entry_count)
+                    tmp = [0.0] * len(headers)
+                    entry_count = 0
+                    current_date = entry["begin_datetime_mpt"].split(" ")[0]
+
+                    # Average over dailies
+                    for idx, header in enumerate(headers):
+                        tmp[idx] += float(entry[header])
+
+
 
         return combined_data
