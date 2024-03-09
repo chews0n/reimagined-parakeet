@@ -37,8 +37,8 @@ for year in range(2003, 2023):
             "frequency": "daily",
             "data": ["value"],
             "facets": {},
-            "start": "1990-01-01",
-            "end": "2000-01-01",
+            "start": f"{year}-01-01",
+            "end": f"{year}-12-31",
             "sort": [{"column": "period", "direction": "desc"}],
             "offset": 0,
             "length": 5000
