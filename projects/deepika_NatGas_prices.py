@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 import json
 
+import numpy as np
+
 
 class APIDataFetcher:
 
@@ -64,3 +66,19 @@ for year in range(2023, 1999, -1):
 
 # Save all data to a CSV file in data/raw folder
 all_data.to_csv("data/raw/all_Nat_gas_prices.csv", index=False)
+
+# ---------------------------*---------------------------------------------------
+
+# to get average price for each date and save the data to a csv
+all_data['date']= pd.to_datetime(all_data['date'])
+all_data['price'] = all_data['price'].astype(float)
+
+# Group by 'date' and calculate the mean of 'price'
+all_data_avg = all_data.groupby('date')['price'].mean()
+
+# Round the mean to 3 decimal places
+all_data_avg_rounded = all_data_avg.round(3).reset_index()
+
+# Save the result to a new csv file
+all_data_avg_rounded.to_csv('data/raw/all_NatGasPrices_daily_avg.csv', index = False)
+
