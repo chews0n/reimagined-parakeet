@@ -41,7 +41,14 @@ def main() -> int:
 	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023, ["pool_price", "rolling_30day_avg"])
 
 	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
-	feature_list = pd.DataFrame()
+	feature_list = pd.DataFrame({
+		'Date': internal_load_data[0],
+		'alberta_internal_load': internal_load_data[1],
+		'pool_price': pool_price_data[1],
+		'rolling_30day_avg': pool_price_data[2]
+	})
+
+	print(feature_list.head(10))
 
 	# your feature list will look something like the chart below...
 	# Date || alberta_internal_load || pool_price || rolling_30day_avg -> for the headers
