@@ -92,10 +92,10 @@ def main() -> int:
 	weather_downloader = DownloadWeatherData(start_year=2003, end_year=2023)
 	weather_data_frames = weather_downloader.download_data_to_memory()
 
-    # Combine all yearly weather data into a single DataFrame
+	# Combine all yearly weather data into a single DataFrame
 	weather_data_combined = pd.concat(weather_data_frames)
 
-    # Extract the relevant columns
+	# Extract the relevant columns
 	weather_features = weather_data_combined[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
 	weather_features['Mean Temp (°C)'] = pd.to_numeric(weather_features['Mean Temp (°C)'], errors='coerce')
 	weather_features['Spd of Max Gust (km/h)'] = pd.to_numeric(weather_features['Spd of Max Gust (km/h)'], errors='coerce')
