@@ -85,8 +85,30 @@ def main() -> int:
 	# 	print(f"Status Code: {status_code}")
 	# print(current_supply_demand.keys())
 
-	weather_data_downloader = DownloadWeatherData(start_year=2020)
-	weather_data_downloader.download_data()
+	# weather_data_downloader = DownloadWeatherData(start_year=2020)
+	# weather_data_downloader.download_data()
+
+	# Fetch weather data
+	weather_downloader = DownloadWeatherData(start_year=2003, end_year=2023)
+	weather_data_frames = weather_downloader.download_data_to_memory()
+
+    # Combine all yearly weather data into a single DataFrame
+	weather_data_combined = pd.concat(weather_data_frames)
+
+    # Extract the relevant columns
+	weather_features = weather_data_combined[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
+	weather_features['Mean Temp (°C)'] = pd.to_numeric(weather_features['Mean Temp (°C)'], errors='coerce')
+	weather_features['Spd of Max Gust (km/h)'] = pd.to_numeric(weather_features['Spd of Max Gust (km/h)'], errors='coerce')
+	weather_features['Total Precip (mm)'] = pd.to_numeric(weather_features['Total Precip (mm)'], errors='coerce')
+
+	# Rename 'Date/Time' to 'Date' for consistency with the existing 'feature_list' DataFrame
+	weather_features.rename(columns={'Date/Time': 'Date'}, inplace=True)
+
+	# Merge the weather data with your existing 'feature_list' DataFrame
+	feature_list_with_weather = pd.merge(feature_list, weather_features, on='Date', how='left')
+
+	# Print the combined DataFrame to check
+	print(feature_list_with_weather.head(10))
 
 	# TODO: Pull down natural gas prices
 
