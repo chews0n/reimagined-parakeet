@@ -56,7 +56,21 @@ def main() -> int:
 	# ... repeat that for the remaining 20 years
 
 	# check if the dataframe contains nan values
+	print(feature_list.isnull().sum())
+
 	# check if all of the dates are present
+	# first off, we need to make sure data type of the 'Date' column is datetime:
+	print(feature_list['Date'].dtype) 
+	# it turns out that this feature is 'Object' which is string.
+	# so we have to convert them to datetime format to for next tasks
+	feature_list['Date'] = pd.to_datetime(feature_list['Date'])
+	# optional: double check the data type, it should be datetime64
+	print(feature_list['Date'].dtype) 
+	# now we can check the missing dates
+	full_date_range = pd.date_range(start='2003-01-01', end='2023-12-31', freq='D')
+	missing_dates = full_date_range.difference(feature_list['Date'])
+	print(f"Missing dates are: {missing_dates}")
+
 	# check for data that is out of range, if you pull down a temperature was +500*C
 
 	# Testing: Print first 5 entries of the Alberta Internal Load data
