@@ -84,6 +84,9 @@ class AESOfetcher:
                     for idx, header in enumerate(headers):
                         tmp[idx] += float(entry[header])
 
-
+            # append the last day to the combined data object
+            combined_data[0].append(current_date)
+            for idx, header in enumerate(headers):
+                combined_data[idx + 1].append(tmp[idx] / entry_count)
 
         return combined_data
