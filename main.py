@@ -58,6 +58,13 @@ def main() -> int:
 	# check if the dataframe contains nan values
 	print(feature_list.isnull().sum())
 
+	if feature_list.isnull().sum() > 0:
+		# there are nan values, let's handle them programatically
+		feature_list.fillna(0.0)
+
+		# alternatively you could go through and average entry before and entry afterwards, really most of this is moot
+		# but good to have an idea of what to do with missing values.
+
 	# check if all of the dates are present
 	# first off, we need to make sure data type of the 'Date' column is datetime:
 	print(feature_list['Date'].dtype) 
