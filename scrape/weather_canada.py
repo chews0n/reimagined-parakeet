@@ -1,6 +1,7 @@
 import urllib.request
 from datetime import date
 import os
+import pandas as pd 
 
 
 class DownloadWeatherData:
@@ -37,3 +38,21 @@ class DownloadWeatherData:
         for year in range(self.start_year, self.end_year + 1):
             year_string = self.scraping_string.format(self.station_number, year)
             urllib.request.urlretrieve(year_string, filename=download_location.format(year))
+
+    def download_data_to_memory(self):
+        """
+        Download daily weather data and load it directly into memory as pandas DataFrames.
+        """
+        data_frames = []  # Store the data for each year
+        for year in range(self.start_year, self.end_year + 1):
+            year_string = self.scraping_string.format(self.station_number, year)
+            response = urllib.request.urlopen(year_string)
+            df = pd.read_csv(response, parse_dates=['Date/Time'])
+            
+            # convert numeric columns (e.g., temperatures, precipitation)
+            numeric_columns = ['Max Temp (°C)', 'Min Temp (°C)', 'Mean Temp (°C)', 'Total Rain (mm)', 'Total Snow (cm)', 'Total Precip (mm)', 'Snow on Grnd (cm)']
+            for col in numeric_columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')            
+            data_frames.append(df)
+
+        return data_frames
