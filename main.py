@@ -41,7 +41,14 @@ def main() -> int:
 	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023, ["pool_price", "rolling_30day_avg"])
 
 	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
-	feature_list = pd.DataFrame()
+	feature_list = pd.DataFrame({
+		'Date': internal_load_data[0],
+		'alberta_internal_load': internal_load_data[1],
+		'pool_price': pool_price_data[1],
+		'rolling_30day_avg': pool_price_data[2]
+	})
+
+	print(feature_list.head(10))
 
 	# your feature list will look something like the chart below...
 	# Date || alberta_internal_load || pool_price || rolling_30day_avg -> for the headers
@@ -49,16 +56,30 @@ def main() -> int:
 	# ... repeat that for the remaining 20 years
 
 	# check if the dataframe contains nan values
+	print(feature_list.isnull().sum())
+
+	if feature_list.isnull().sum() > 0:
+		# there are nan values, let's handle them programatically
+		feature_list.fillna(0.0)
+
+		# alternatively you could go through and average entry before and entry afterwards, really most of this is moot
+		# but good to have an idea of what to do with missing values.
+
 	# check if all of the dates are present
+	# first off, we need to make sure data type of the 'Date' column is datetime:
+	print(feature_list['Date'].dtype) 
+	# it turns out that this feature is 'Object' which is string.
+	# so we have to convert them to datetime format to for next tasks
+	feature_list['Date'] = pd.to_datetime(feature_list['Date'])
+	# optional: double check the data type, it should be datetime64
+	print(feature_list['Date'].dtype) 
+	# now we can check the missing dates
+	full_date_range = pd.date_range(start='2003-01-01', end='2023-12-31', freq='D')
+	missing_dates = full_date_range.difference(feature_list['Date'])
+	print(f"Missing dates are: {missing_dates}")
+
 	# check for data that is out of range, if you pull down a temperature was +500*C
 
-	# Testing: Print first 5 entries of the Alberta Internal Load data
-	print("First 5 entries of Alberta Internal Load data:")
-	print(internal_load_data[:5])
-
-	# Testing: Print first 5 entries of the Pool Price data
-	print("\nFirst 5 entries of Pool Price data:")
-	print(pool_price_data[:5])
 
 
 	# Try fetching Current Supply Demand
