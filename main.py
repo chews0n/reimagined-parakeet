@@ -73,13 +73,6 @@ def main() -> int:
 
 	# check for data that is out of range, if you pull down a temperature was +500*C
 
-	# Testing: Print first 5 entries of the Alberta Internal Load data
-	print("First 5 entries of Alberta Internal Load data:")
-	print(internal_load_data[:5])
-
-	# Testing: Print first 5 entries of the Pool Price data
-	print("\nFirst 5 entries of Pool Price data:")
-	print(pool_price_data[:5])
 
 
 	# Try fetching Current Supply Demand
