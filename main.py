@@ -7,6 +7,9 @@ from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
 
 def main() -> int:
+	START_YEAR = 2003
+	END_YEAR = 2023 
+
 	# Create an instance of the AESOfetcher with the API key
 	fetcher = AESOfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
@@ -35,10 +38,10 @@ def main() -> int:
 
 
 	# Fetch Alberta Internal Load data for all years
-	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, 2003, 2023, ["alberta_internal_load"])
+	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, START_YEAR, END_YEAR, ["alberta_internal_load"])
 
 	# Fetch Pool Price data for all years
-	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023, ["pool_price", "rolling_30day_avg"])
+	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, START_YEAR, END_YEAR, ["pool_price", "rolling_30day_avg"])
 
 	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
 	feature_list = pd.DataFrame({
@@ -74,7 +77,7 @@ def main() -> int:
 	# optional: double check the data type, it should be datetime64
 	print(feature_list['Date'].dtype) 
 	# now we can check the missing dates
-	full_date_range = pd.date_range(start='2003-01-01', end='2023-12-31', freq='D')
+	full_date_range = pd.date_range(start=f"{START_YEAR}-01-01", end=f"{END_YEAR}-12-31", freq='D')
 	missing_dates = full_date_range.difference(feature_list['Date'])
 	print(f"Missing dates are: {missing_dates}")
 
@@ -96,7 +99,7 @@ def main() -> int:
 	# weather_data_downloader.download_data()
 
 	# Fetch weather data
-	weather_downloader = DownloadWeatherData(start_year=2003, end_year=2023)
+	weather_downloader = DownloadWeatherData(start_year=START_YEAR, end_year=END_YEAR)
 	weather_data_frames = weather_downloader.download_data_to_memory()
 
 	# Combine all yearly weather data into a single DataFrame
