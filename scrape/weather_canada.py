@@ -55,4 +55,6 @@ class DownloadWeatherData:
                 df[col] = pd.to_numeric(df[col], errors='coerce')            
             data_frames.append(df)
 
-        return data_frames
+        combined_data_frames = pd.concat(data_frames, ignore_index=True)
+        
+        return combined_data_frames
