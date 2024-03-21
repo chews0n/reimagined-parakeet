@@ -2,12 +2,13 @@ import sys
 
 import pandas as pd
 
-from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
+from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, PUBLIC_HOLIDAY_URL
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
+from scrape.public_holiday import Fetch_Public_Holidays 
 
 def main() -> int:
-	START_YEAR = 2003
+	START_YEAR = 2021
 	END_YEAR = 2023 
 
 	# Create an instance of the AESOfetcher with the API key
@@ -134,6 +135,14 @@ def main() -> int:
 	feature_list = feature_list[['date', 'month', 'day_of_year', 'alberta_internal_load', 'pool_price', 'previous_day_pool_price', 'rolling_30day_avg',
        'mean_temp', 'spd_of_max_gust', 'total_precip']]
 	
+	# NEW FEATURES: Public Holidays for Alberta
+
+	# create an instance from public_holiday.py
+	holiday_instance = Fetch_Public_Holidays(PUBLIC_HOLIDAY_URL)
+	# fetch Alberta holidays and concat to a dataframe
+	holidays_df = holiday_instance.fetch_and_combine_holidays(start_year=START_YEAR, end_year=END_YEAR, country='CA')
+	print(holidays_df)
+
 	# Print the combined DataFrame to check
 	print(feature_list.head(10))
 

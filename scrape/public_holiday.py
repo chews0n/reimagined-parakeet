@@ -31,10 +31,16 @@ class Fetch_Public_Holidays:
         return self.public_holidays
 
     def filter_out_alberta_holidays(self):
-        for holidays in self.public_holidays:
-            if holidays['counties'] is None or self.ab_county_name in holidays['counties']:
-                self.alberta_holidays.append(holidays)
-            return pd.DataFrame(self.alberta_holidays)
+        """Filters out holidays specific to Alberta from the fetched public holidays."""
+        self.alberta_holidays.clear()
+        for holiday in self.public_holidays:
+            if holiday['counties'] is None:
+                self.alberta_holidays.append(holiday)
+            else:
+                for county in holiday['counties']:
+                    if county == self.ab_county_name:
+                        self.alberta_holidays.append(holiday)
+        return pd.DataFrame(self.alberta_holidays)
         
     def fetch_and_combine_holidays(self, start_year, end_year, country):
         """Fetch and combine all Alberta holidays across a range of years."""
