@@ -100,25 +100,31 @@ def main() -> int:
 
 	# Fetch weather data
 	weather_downloader = DownloadWeatherData(start_year=START_YEAR, end_year=END_YEAR)
-	weather_data_frames = weather_downloader.download_data_to_memory()
-
-	# Combine all yearly weather data into a single DataFrame
-	weather_data_combined = pd.concat(weather_data_frames)
+	weather_data = weather_downloader.download_data_to_memory()
 
 	# Extract the relevant columns
-	weather_features = weather_data_combined[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
-	weather_features['Mean Temp (°C)'] = pd.to_numeric(weather_features['Mean Temp (°C)'], errors='coerce')
-	weather_features['Spd of Max Gust (km/h)'] = pd.to_numeric(weather_features['Spd of Max Gust (km/h)'], errors='coerce')
-	weather_features['Total Precip (mm)'] = pd.to_numeric(weather_features['Total Precip (mm)'], errors='coerce')
+	weather_features = weather_data[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
 
 	# Rename 'Date/Time' to 'Date' for consistency with the existing 'feature_list' DataFrame
 	weather_features.rename(columns={'Date/Time': 'Date'}, inplace=True)
 
 	# Merge the weather data with your existing 'feature_list' DataFrame
-	feature_list_with_weather = pd.merge(feature_list, weather_features, on='Date', how='left')
+	feature_list = pd.merge(feature_list, weather_features, on='Date', how='left')
+
+	# Convert column names: lowercase, replace spaces with underscores, remove units in parentheses
+	feature_list.columns = (feature_list.columns
+						 .str.lower()
+						 .str.replace(r"\(.*?\)", "", regex=True)
+						 .str.strip()
+						 .str.replace(" ", "_"))
+	
+	# Check missing values
+	feature_list.isnull().sum()
+	# Fill missing values with 0.0
+	feature_list.fillna(0.0, inplace=True)
 
 	# Print the combined DataFrame to check
-	print(feature_list_with_weather.head(10))
+	print(feature_list.head(10))
 
 	# TODO: Pull down natural gas prices
 
