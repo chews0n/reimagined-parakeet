@@ -117,12 +117,23 @@ def main() -> int:
 						 .str.replace(r"\(.*?\)", "", regex=True)
 						 .str.strip()
 						 .str.replace(" ", "_"))
-	
+
 	# Check missing values
 	feature_list.isnull().sum()
 	# Fill missing values with 0.0
 	feature_list.fillna(0.0, inplace=True)
 
+	# CREATING NEW FEATURES: Extract the month and the day of the year from the 'date' column
+	feature_list['month'] = feature_list['date'].dt.month 
+	feature_list['day_of_year'] = feature_list['date'].dt.day_of_year 
+
+	# NEW FEATURES: Previous day’s pool price (float)
+	feature_list['previous_days_pool_price'] = feature_list['pool_price'].shift(1).fillna(0) #fill the missing value of the first row
+
+	# Re-arrange columns' positiions
+	feature_list = feature_list[['date', 'month', 'day_of_year', 'alberta_internal_load', 'pool_price', 'previous_day_pool_price', 'rolling_30day_avg',
+       'mean_temp', 'spd_of_max_gust', 'total_precip']]
+	
 	# Print the combined DataFrame to check
 	print(feature_list.head(10))
 
