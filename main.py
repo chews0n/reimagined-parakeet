@@ -8,7 +8,7 @@ from scrape.weather_canada import DownloadWeatherData
 from scrape.public_holiday import Fetch_Public_Holidays 
 
 def main() -> int:
-	START_YEAR = 2021
+	START_YEAR = 2022
 	END_YEAR = 2023 
 
 	# Create an instance of the AESOfetcher with the API key
@@ -124,31 +124,43 @@ def main() -> int:
 	# Fill missing values with 0.0
 	feature_list.fillna(0.0, inplace=True)
 
+
 	# CREATING NEW FEATURES: Extract the month and the day of the year from the 'date' column
 	feature_list['month'] = feature_list['date'].dt.month 
 	feature_list['day_of_year'] = feature_list['date'].dt.day_of_year 
 
 	# NEW FEATURES: Previous day’s pool price (float)
-	feature_list['previous_days_pool_price'] = feature_list['pool_price'].shift(1).fillna(0) #fill the missing value of the first row
+	feature_list['previous_day_pool_price'] = feature_list['pool_price'].shift(1).fillna(0) #fill the missing value of the first row
 
 	# Re-arrange columns' positiions
-	feature_list = feature_list[['date', 'month', 'day_of_year', 'alberta_internal_load', 'pool_price', 'previous_day_pool_price', 'rolling_30day_avg',
-       'mean_temp', 'spd_of_max_gust', 'total_precip']]
+	feature_list = feature_list[['date', 'month', 'day_of_year', 'mean_temp',
+							  'spd_of_max_gust', 'total_precip' ,
+							  'alberta_internal_load', 'pool_price',
+							  'rolling_30day_avg', 'previous_day_pool_price']]
 	
+
 	# NEW FEATURES: Public Holidays for Alberta
 
 	# create an instance from public_holiday.py
 	holiday_instance = Fetch_Public_Holidays(PUBLIC_HOLIDAY_URL)
+
 	# fetch Alberta holidays and concat to a dataframe
-	holidays_df = holiday_instance.fetch_and_combine_holidays(start_year=START_YEAR, end_year=END_YEAR, country='CA')
-	print(holidays_df)
+	df_holidays = holiday_instance.fetch_and_combine_holidays(start_year=START_YEAR, end_year=END_YEAR, country='CA')
+
+	# convert 'date' column to datetime type
+	df_holidays['date'] = pd.to_datetime(df_holidays['date'])
+
+	# create a new column in the feature list and set all values to 0 initially
+	feature_list['is_public_holiday'] = 0
+
+	# Check if the "date" in feature_list exists in df_holidays' "date" column
+	# if yes, set the value in "is_public_holiday" column to 1
+	feature_list['is_public_holiday'] = feature_list['date'].isin(df_holidays['date']).astype(int)
 
 	# Print the combined DataFrame to check
 	print(feature_list.head(10))
 
 	# TODO: Pull down natural gas prices
-
-	# TODO: Pull down public holidays for Alberta
 
 	return 0
 
