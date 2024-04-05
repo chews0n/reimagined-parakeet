@@ -3,7 +3,9 @@
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
-import plotly.express as px  # For easy Plotly graph creation
+import plotly.express as px  
+#from plotly.graph_objs import go # wouldn't work for me
+import seaborn as sns
 from datetime import datetime, timedelta
 import os
 
@@ -37,6 +39,7 @@ def get_smp_trend(start_date, end_date, api_key=AESO_API_KEY):
         data = response.json()["return"]["System Marginal Price Report"]
 
         df = pd.DataFrame(data)
+        print(df.columns)
         # Convert datetime columns if needed
         if 'begin_datetime_mpt' in df.columns:  # Adjust column name if necessary
             df['begin_datetime_mpt'] = pd.to_datetime(df['begin_datetime_mpt'])
@@ -46,6 +49,10 @@ def get_smp_trend(start_date, end_date, api_key=AESO_API_KEY):
             
         if 'system_marginal_price' in df.columns:  # Adjust column name if necessary
             df['system_marginal_price'] = pd.to_numeric(df['system_marginal_price'])
+        
+        # Total Cost Calculation
+        if 'volume' in df.columns and 'system_marginal_price' in df.columns:  # Verify columns exist
+            df['Total Cost'] = df['volume'] * df['system_marginal_price'] 
         
         # CSV Export ------------------------------------------------------------
         output_folder = "../data/raw/"  # Go back one folder, then into 'data/raw'
@@ -57,6 +64,7 @@ def get_smp_trend(start_date, end_date, api_key=AESO_API_KEY):
 
         df.to_csv(output_path, index=False)  # Save CSV without index column
         print(f'File output to {output_path}')
+        
         # Create the Plotly figure for Volume Trend------------------------------
         fig = px.line(df, x='begin_datetime_mpt', y='volume', title='Volume Trend')
 
@@ -78,6 +86,33 @@ def get_smp_trend(start_date, end_date, api_key=AESO_API_KEY):
         )
 
         fig.show()
+        
+        # Create the Plotly figure for Total Cost
+        fig_cost = px.line(df, x='begin_datetime_mpt', y='Total Cost', title='Total Cost Trend')
+
+        # Customize (optional)
+        fig_cost.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Total Cost"
+        )
+        fig_cost.show()
+        
+        # make a new df that is monthly data
+        monthly_summary = df.resample('M', on='begin_datetime_mpt').agg(
+            Average_Cost=('system_marginal_price', 'mean'),
+            Total_Volume=('volume', 'sum'), 
+            Total_Cost=('Total Cost', 'sum')
+            )
+        # Assuming you already have 'monthly_costs' DataFrame with index and 'Total Cost' column
+        sns.barplot(x=monthly_summary.index, y="Total_Cost", data=monthly_summary)
+
+        sns.set_theme(style="whitegrid") # Example style
+        plt.title("Monthly Total Costs") 
+        plt.xlabel("Month")
+        plt.ylabel("Total Cost")
+        plt.xticks(rotation=45) # Rotate x-axis labels if needed 
+        plt.show()
+
 
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
