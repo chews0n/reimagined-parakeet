@@ -9,6 +9,14 @@ from scrape.public_holiday import Fetch_Public_Holidays
 
 def main() -> int:
 
+	if AESO_API_KEY == '':
+		print('Please set the AESO_API_KEY environment variable before running the script')
+		return 1
+
+	if EIA_API_KEY == '':
+		print('Please set the EIA_API_KEY environment variable before running the script')
+		return 1
+
 	# Create an instance of the APIfetcher with the API key
 	fetcher = APIfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
@@ -121,19 +129,40 @@ def main() -> int:
 				 'length': 5000}
 	ng_prices, status_code_eia = ng_data.fetch_data(EIA_NATURAL_GAS_URL, params=ng_params)
 
+	# can only grab 5000 entries at a time from the EIA site....
+	if len(ng_prices['response']['data']) == 5000:
+		# get the maximum date
+		max_date = ng_prices['response']['data'][len(ng_prices['response']['data'])-1]['period']
+
+		ng_params = {'frequency': 'daily', 'data[]': 'value', 'start': max_date,
+					 'facets[duoarea][]': 'RGC',
+					 'end': f'{END_YEAR + 1}-01-31', 'sort[0][column]': 'period', 'sort[0][direction]': 'asc',
+					 'offset': 1,
+					 'length': 5000}
+		ng_prices2, status_code_eia2 = ng_data.fetch_data(EIA_NATURAL_GAS_URL, params=ng_params)
+
+		ng_prices['response']['data'].extend(ng_prices2['response']['data'])
+
 	feature_list['ng_price'] = 0.0
 	ng_idx = 0
 	curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
 
 	for index, row in feature_list.iterrows():
-		while pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) < row['date']:
-			ng_idx += 1
 
-		if pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) == row['date']:
-			curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
-			ng_idx += 1
+		if ng_idx < len(ng_prices['response']['data']):
+			while pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) < row['date']:
+				ng_idx += 1
+
+			if pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) == row['date']:
+				curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
+				ng_idx += 1
+
+		else:
+			print('Range of NG values out of bounds')
 
 		feature_list.loc[index, 'ng_price'] = curr_ng_price
+
+	# have all the data, create dataseries for each year, we'll use a year as a dataset
 
 	return 0
 
