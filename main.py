@@ -167,7 +167,16 @@ def main() -> int:
 	features = ['day_of_year', 'mean_temp', 'spd_of_max_gust', 'total_precip', 'alberta_internal_load', 'rolling_30day_avg', 'previous_day_pool_price', 'is_public_holiday', 'ng_price']
 	elecModel = MLModel(Xvals=feature_list.loc[:, features], Yvals=pd.DataFrame(feature_list.loc[:, 'pool_price']))
 
+	# save elecModel into a pickle that can be loaded and used later.
+
 	print(f'Model accuracy is: {elecModel.accuracy}')
+
+	# Next step, so you would wrap the model training up into a function that can be called whenever a user wants to retrain the model
+
+	# Also, we would be saving and databasing the pickles that we save from the MLModel object in order to make predictions.
+
+	# The second last step of this project is to make a UI for the user to feed in inputs (X/filled features) in a spreadsheet and return output values and perhaps a plot.
+	# This will all be done within the Django framework.
 
 
 	return 0
