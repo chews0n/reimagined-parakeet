@@ -5,12 +5,12 @@ Note: I modified the 'main.py' file by Chris, adding exporting to CSV file using
 
 import sys
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
-from scrape.aeso_scraper import AESOfetcher
+from scrape.api_scraper import APIfetcher
 import pandas as pd 
 
 def main() -> int:
-	# Create an instance of the AESOfetcher with the API key
-	fetcher = AESOfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
+	# Create an instance of the APIfetcher with the API key
+	fetcher = APIfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
 
 	# Try fetching Actual Forecast for a specific date range

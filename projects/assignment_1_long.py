@@ -13,7 +13,7 @@ class AESOfetcher:
     """A class for fetching data from the AESO API using API calls"""
 
     def __init__(self, api_key):
-        """Initialize the AESOfetcher instance"""
+        """Initialize the APIfetcher instance"""
         self.api_key = api_key
         self.base_url = 'https://api.aeso.ca/report'
         self.headers = {
@@ -36,7 +36,7 @@ class AESOfetcher:
             print(f"Error fetching  data: {e}")
             return None, getattr(e.response, 'status_code', 0)
 
-# Create an instance of the AESOfetcher with the API key
+# Create an instance of the APIfetcher with the API key
 fetcher = AESOfetcher(api_key=API_KEY)
 
 # Try fetching Actual Forecast for a specific date range

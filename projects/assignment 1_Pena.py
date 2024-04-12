@@ -3,14 +3,14 @@ import json
 
 from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, \
 	CALGARY_API_URL, PUBLIC_HOLIDAY_URL
-from scrape.aeso_scraper import AESOfetcher
+from scrape.api_scraper import APIfetcher
 from scrape.weather_canada import DownloadWeatherData
 from scrape.public_holiday import Fetch_Public_Holidays
 
 # No need to copy/paste the class and constants into here, that's what imports are for
 
-# Create an instance of the AESOfetcher with the API key
-fetcher = AESOfetcher(api_key=AESO_API_KEY,base_url=BASE_URL)
+# Create an instance of the APIfetcher with the API key
+fetcher = APIfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
 # Try fetching Actual Forecast for a specific date range
 
@@ -38,7 +38,7 @@ print(f"Status Code: {status_code}")
 print(pool_price_rep.keys())
 
 # Create an instance of the Calgary API with the API key
-#yyc_fetcher = AESOfetcher(api_key=AESO_API_KEY,base_url=CALGARY_API_URL)
+#yyc_fetcher = APIfetcher(api_key=AESO_API_KEY,base_url=CALGARY_API_URL)
 #
 # # Try fetching Actual Forecast for a specific date range
 #

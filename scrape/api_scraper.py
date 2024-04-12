@@ -1,11 +1,11 @@
 import requests
 
 
-class AESOfetcher:
-    """A class for fetching data from the AESO API using API calls"""
+class APIfetcher:
+    """A class for fetching data from the an API using API calls"""
 
     def __init__(self, api_key, base_url, accept_type='application/json'):
-        """Initialize the AESOfetcher instance"""
+        """Initialize the APIfetcher instance"""
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {
@@ -16,7 +16,7 @@ class AESOfetcher:
     def fetch_data(self, dataset, params=None):
         """A method to fetch data from a specific dataset.
 
-        dataset: The specific dataset to fetch from the AESO API.
+        dataset: The specific dataset to fetch from the API.
         params: An optional dictionary of parameters for the query (e.g. startDate).
         """
         try:

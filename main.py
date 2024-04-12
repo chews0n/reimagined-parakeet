@@ -1,42 +1,16 @@
 import sys
-
+import json
 import pandas as pd
 
-from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, PUBLIC_HOLIDAY_URL
-from scrape.aeso_scraper import AESOfetcher
+from utils.constants import *
+from scrape.api_scraper import APIfetcher
 from scrape.weather_canada import DownloadWeatherData
 from scrape.public_holiday import Fetch_Public_Holidays 
 
 def main() -> int:
-	START_YEAR = 2022
-	END_YEAR = 2023 
 
-	# Create an instance of the AESOfetcher with the API key
-	fetcher = AESOfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
-
-
-	# Try fetching Actual Forecast for a specific date range
-	startDate_internal_load = '2015-01-01'
-	endDate_internal_load = '2016-01-01'
-	actual_forecast_data, status_code = fetcher.fetch_data(INTERNAL_LOAD_URL,
-														   {'startDate': startDate_internal_load, 'endDate': endDate_internal_load})
-	print(actual_forecast_data.keys())
-
-	if status_code == -1:
-		print(f"The API failed to fetch the data from the request, please look at the API key and the base url being made in the request")
-		return status_code
-	else:
-		print(f"Status Code: {status_code}")
-
-	load_sum = 0.0
-
-	aeso_data = actual_forecast_data['return']['Actual Forecast Report']
-
-	for loadval in range(len(aeso_data)):
-		load_sum += float(aeso_data[loadval]['alberta_internal_load'])
-
-	print(f"Total Load for 2015: {load_sum}")
-
+	# Create an instance of the APIfetcher with the API key
+	fetcher = APIfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
 	# Fetch Alberta Internal Load data for all years
 	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, START_YEAR, END_YEAR, ["alberta_internal_load"])
@@ -54,11 +28,6 @@ def main() -> int:
 	})
 
 	print(feature_list.head(10))
-
-	# your feature list will look something like the chart below...
-	# Date || alberta_internal_load || pool_price || rolling_30day_avg -> for the headers
-	# 2003-01-01 || 98375 || 23.43 || 65.3 --> this will be one row entry
-	# ... repeat that for the remaining 20 years
 
 	# check if the dataframe contains nan values
 	print(feature_list.isnull().sum())
@@ -78,28 +47,12 @@ def main() -> int:
 	# so we have to convert them to datetime format to for next tasks
 	feature_list['Date'] = pd.to_datetime(feature_list['Date'])
 	# optional: double check the data type, it should be datetime64
-	print(feature_list['Date'].dtype) 
+	print(feature_list['Date'].dtype)
+
 	# now we can check the missing dates
 	full_date_range = pd.date_range(start=f"{START_YEAR}-01-01", end=f"{END_YEAR}-12-31", freq='D')
 	missing_dates = full_date_range.difference(feature_list['Date'])
 	print(f"Missing dates are: {missing_dates}")
-
-	# check for data that is out of range, if you pull down a temperature was +500*C
-
-
-
-	# Try fetching Current Supply Demand
-	# current_supply_demand, status_code = fetcher.fetch_data(CURRENT_SUPPLY_DEMAND_URL)
-	# if status_code == -1:
-	# 	print(
-	# 		f"The API failed to fetch the data from the request, please look at the API key and the base url being made in the request")
-	# 	return status_code
-	# else:
-	# 	print(f"Status Code: {status_code}")
-	# print(current_supply_demand.keys())
-
-	# weather_data_downloader = DownloadWeatherData(start_year=2020)
-	# weather_data_downloader.download_data()
 
 	# Fetch weather data
 	weather_downloader = DownloadWeatherData(start_year=START_YEAR, end_year=END_YEAR)
@@ -162,7 +115,25 @@ def main() -> int:
 	# Print the combined DataFrame to check
 	print(feature_list.head(10))
 
-	# TODO: Pull down natural gas prices
+	ng_data = APIfetcher(EIA_API_KEY, EIA_BASE_URL)
+	ng_params = {'frequency': 'daily', 'data[]': 'value', 'start': f'{START_YEAR-1}-12-31', 'facets[duoarea][]': 'RGC',
+				 'end': f'{END_YEAR+1}-01-31', 'sort[0][column]': 'period', 'sort[0][direction]': 'asc', 'offset': 0,
+				 'length': 5000}
+	ng_prices, status_code_eia = ng_data.fetch_data(EIA_NATURAL_GAS_URL, params=ng_params)
+
+	feature_list['ng_price'] = 0.0
+	ng_idx = 0
+	curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
+	price_tmp_dict = {}
+	for index, row in feature_list.iterrows():
+		while pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) < row['date']:
+			ng_idx += 1
+
+		if pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) == row['date']:
+			curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
+			ng_idx += 1
+
+		feature_list.loc[index, 'ng_price'] = curr_ng_price
 
 	return 0
 
