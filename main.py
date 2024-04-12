@@ -164,7 +164,7 @@ def main() -> int:
 		feature_list.loc[index, 'ng_price'] = curr_ng_price
 
 	# build the ML model
-	features = ['day_of_year', 'mean_temp', 'spd_of_max_gust', 'total_precip' , 'alberta_internal_load', 'pool_price', 'rolling_30day_avg', 'previous_day_pool_price', 'is_public_holiday', 'ng_price']
+	features = ['day_of_year', 'mean_temp', 'spd_of_max_gust', 'total_precip', 'alberta_internal_load', 'rolling_30day_avg', 'previous_day_pool_price', 'is_public_holiday', 'ng_price']
 	elecModel = MLModel(Xvals=feature_list.loc[:, features], Yvals=pd.DataFrame(feature_list.loc[:, 'pool_price']))
 
 	print(f'Model accuracy is: {elecModel.accuracy}')
