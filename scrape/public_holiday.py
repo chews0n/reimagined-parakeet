@@ -9,6 +9,7 @@ Original file is located at
 
 import json
 import requests
+import pandas as pd 
 
 class Fetch_Public_Holidays:
     def __init__(self, base_url):
@@ -27,13 +28,30 @@ class Fetch_Public_Holidays:
         url = f"{self.base_url}/{year}/{country}"
         response = requests.get(url)
         self.public_holidays = json.loads(response.content)
+        return self.public_holidays
 
     def filter_out_alberta_holidays(self):
-
-        for holidays in self.public_holidays:
-            if holidays['counties'] is None:
-                self.alberta_holidays.append(holidays)
+        """Filters out holidays specific to Alberta from the fetched public holidays."""
+        self.alberta_holidays.clear()
+        for holiday in self.public_holidays:
+            if holiday['counties'] is None:
+                self.alberta_holidays.append(holiday)
             else:
-                for counties in holidays['counties']:
-                    if counties == self.ab_county_name:
-                        self.alberta_holidays.append(holidays)
+                for county in holiday['counties']:
+                    if county == self.ab_county_name:
+                        self.alberta_holidays.append(holiday)
+        return pd.DataFrame(self.alberta_holidays)
+        
+    def fetch_and_combine_holidays(self, start_year, end_year, country):
+        """Fetch and combine all Alberta holidays across a range of years."""
+        holidays_df = pd.DataFrame()
+
+        for year in range(start_year, end_year+1):
+            # fetch data for Canada in a specific year
+            self.fetch_data(str(year), country)
+            # filter out Alberta holidays from the fetched data
+            alberta_holidays = self.filter_out_alberta_holidays()
+            # append all the holidasy to the Dataframe
+            holidays_df = pd.concat([holidays_df, alberta_holidays], ignore_index=True)
+        
+        return holidays_df

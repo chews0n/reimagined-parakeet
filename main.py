@@ -2,11 +2,15 @@ import sys
 
 import pandas as pd
 
-from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT
+from utils.constants import AESO_API_KEY, BASE_URL, CURRENT_SUPPLY_DEMAND_URL, INTERNAL_LOAD_URL, POOL_PRICE_REPORT, PUBLIC_HOLIDAY_URL
 from scrape.aeso_scraper import AESOfetcher
 from scrape.weather_canada import DownloadWeatherData
+from scrape.public_holiday import Fetch_Public_Holidays 
 
 def main() -> int:
+	START_YEAR = 2022
+	END_YEAR = 2023 
+
 	# Create an instance of the AESOfetcher with the API key
 	fetcher = AESOfetcher(api_key=AESO_API_KEY, base_url=BASE_URL)
 
@@ -35,10 +39,10 @@ def main() -> int:
 
 
 	# Fetch Alberta Internal Load data for all years
-	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, 2003, 2023, ["alberta_internal_load"])
+	internal_load_data = fetcher.fetch_data_all_years(INTERNAL_LOAD_URL, START_YEAR, END_YEAR, ["alberta_internal_load"])
 
 	# Fetch Pool Price data for all years
-	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, 2003, 2023, ["pool_price", "rolling_30day_avg"])
+	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, START_YEAR, END_YEAR, ["pool_price", "rolling_30day_avg"])
 
 	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
 	feature_list = pd.DataFrame({
@@ -74,7 +78,7 @@ def main() -> int:
 	# optional: double check the data type, it should be datetime64
 	print(feature_list['Date'].dtype) 
 	# now we can check the missing dates
-	full_date_range = pd.date_range(start='2003-01-01', end='2023-12-31', freq='D')
+	full_date_range = pd.date_range(start=f"{START_YEAR}-01-01", end=f"{END_YEAR}-12-31", freq='D')
 	missing_dates = full_date_range.difference(feature_list['Date'])
 	print(f"Missing dates are: {missing_dates}")
 
@@ -96,30 +100,67 @@ def main() -> int:
 	# weather_data_downloader.download_data()
 
 	# Fetch weather data
-	weather_downloader = DownloadWeatherData(start_year=2003, end_year=2023)
-	weather_data_frames = weather_downloader.download_data_to_memory()
-
-	# Combine all yearly weather data into a single DataFrame
-	weather_data_combined = pd.concat(weather_data_frames)
+	weather_downloader = DownloadWeatherData(start_year=START_YEAR, end_year=END_YEAR)
+	weather_data = weather_downloader.download_data_to_memory()
 
 	# Extract the relevant columns
-	weather_features = weather_data_combined[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
-	weather_features['Mean Temp (°C)'] = pd.to_numeric(weather_features['Mean Temp (°C)'], errors='coerce')
-	weather_features['Spd of Max Gust (km/h)'] = pd.to_numeric(weather_features['Spd of Max Gust (km/h)'], errors='coerce')
-	weather_features['Total Precip (mm)'] = pd.to_numeric(weather_features['Total Precip (mm)'], errors='coerce')
+	weather_features = weather_data[['Date/Time', 'Mean Temp (°C)', 'Spd of Max Gust (km/h)', 'Total Precip (mm)']].copy()
 
 	# Rename 'Date/Time' to 'Date' for consistency with the existing 'feature_list' DataFrame
 	weather_features.rename(columns={'Date/Time': 'Date'}, inplace=True)
 
 	# Merge the weather data with your existing 'feature_list' DataFrame
-	feature_list_with_weather = pd.merge(feature_list, weather_features, on='Date', how='left')
+	feature_list = pd.merge(feature_list, weather_features, on='Date', how='left')
+
+	# Convert column names: lowercase, replace spaces with underscores, remove units in parentheses
+	feature_list.columns = (feature_list.columns
+						 .str.lower()
+						 .str.replace(r"\(.*?\)", "", regex=True)
+						 .str.strip()
+						 .str.replace(" ", "_"))
+
+	# Check missing values
+	feature_list.isnull().sum()
+	# Fill missing values with 0.0
+	feature_list.fillna(0.0, inplace=True)
+
+
+	# CREATING NEW FEATURES: Extract the month and the day of the year from the 'date' column
+	feature_list['month'] = feature_list['date'].dt.month 
+	feature_list['day_of_year'] = feature_list['date'].dt.day_of_year 
+
+	# NEW FEATURES: Previous day’s pool price (float)
+	feature_list['previous_day_pool_price'] = feature_list['pool_price'].shift(1).fillna(0) #fill the missing value of the first row
+
+	# Re-arrange columns' positiions
+	feature_list = feature_list[['date', 'month', 'day_of_year', 'mean_temp',
+							  'spd_of_max_gust', 'total_precip' ,
+							  'alberta_internal_load', 'pool_price',
+							  'rolling_30day_avg', 'previous_day_pool_price']]
+	
+
+	# NEW FEATURES: Public Holidays for Alberta
+
+	# create an instance from public_holiday.py
+	holiday_instance = Fetch_Public_Holidays(PUBLIC_HOLIDAY_URL)
+
+	# fetch Alberta holidays and concat to a dataframe
+	df_holidays = holiday_instance.fetch_and_combine_holidays(start_year=START_YEAR, end_year=END_YEAR, country='CA')
+
+	# convert 'date' column to datetime type
+	df_holidays['date'] = pd.to_datetime(df_holidays['date'])
+
+	# create a new column in the feature list and set all values to 0 initially
+	feature_list['is_public_holiday'] = 0
+
+	# Check if the "date" in feature_list exists in df_holidays' "date" column
+	# if yes, set the value in "is_public_holiday" column to 1
+	feature_list['is_public_holiday'] = feature_list['date'].isin(df_holidays['date']).astype(int)
 
 	# Print the combined DataFrame to check
-	print(feature_list_with_weather.head(10))
+	print(feature_list.head(10))
 
 	# TODO: Pull down natural gas prices
-
-	# TODO: Pull down public holidays for Alberta
 
 	return 0
 
