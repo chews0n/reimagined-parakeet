@@ -5,7 +5,8 @@ import pandas as pd
 from utils.constants import *
 from scrape.api_scraper import APIfetcher
 from scrape.weather_canada import DownloadWeatherData
-from scrape.public_holiday import Fetch_Public_Holidays 
+from scrape.public_holiday import Fetch_Public_Holidays
+from model.mlModel import MLModel
 
 def main() -> int:
 
@@ -162,7 +163,12 @@ def main() -> int:
 
 		feature_list.loc[index, 'ng_price'] = curr_ng_price
 
-	# have all the data, create dataseries for each year, we'll use a year as a dataset
+	# build the ML model
+	features = ['day_of_year', 'mean_temp', 'spd_of_max_gust', 'total_precip' , 'alberta_internal_load', 'pool_price', 'rolling_30day_avg', 'previous_day_pool_price', 'is_public_holiday', 'ng_price']
+	elecModel = MLModel(Xvals=feature_list.loc[:, features], Yvals=pd.DataFrame(feature_list.loc[:, 'pool_price']))
+
+	print(f'Model accuracy is: {elecModel.accuracy}')
+
 
 	return 0
 
