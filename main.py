@@ -45,11 +45,12 @@ def main() -> int:
 	pool_price_data = fetcher.fetch_data_all_years(POOL_PRICE_REPORT, START_YEAR, END_YEAR, ["pool_price", "rolling_30day_avg"])
 
 	# create a dataframe and lineup the 3 separate headers that you have above with the correct date
+	df_headers = ['Date', 'alberta_internal_load', 'pool_price', 'rolling_30day_avg']
 	feature_list = pd.DataFrame({
-		'Date': internal_load_data[0],
-		'alberta_internal_load': internal_load_data[1],
-		'pool_price': pool_price_data[1],
-		'rolling_30day_avg': pool_price_data[2]
+		df_headers[0]: internal_load_data[0],
+		df_headers[1]: internal_load_data[1],
+		df_headers[2]: pool_price_data[1],
+		df_headers[3]: pool_price_data[2]
 	})
 
 	print(feature_list.head(10))
@@ -62,12 +63,13 @@ def main() -> int:
 	# check if the dataframe contains nan values
 	print(feature_list.isnull().sum())
 
-	if feature_list.isnull().sum() > 0:
-		# there are nan values, let's handle them programatically
-		feature_list.fillna(0.0)
+	for headers in df_headers:
+		if feature_list[headers].isnull().sum() > 0:
+			# there are nan values, let's handle them programatically
+			feature_list[headers].fillna(0.0)
 
-		# alternatively you could go through and average entry before and entry afterwards, really most of this is moot
-		# but good to have an idea of what to do with missing values.
+			# alternatively you could go through and average entry before and entry afterwards, really most of this is moot
+			# but good to have an idea of what to do with missing values.
 
 	# check if all of the dates are present
 	# first off, we need to make sure data type of the 'Date' column is datetime:
