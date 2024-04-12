@@ -124,7 +124,7 @@ def main() -> int:
 	feature_list['ng_price'] = 0.0
 	ng_idx = 0
 	curr_ng_price = ng_prices['response']['data'][ng_idx]['value']
-	price_tmp_dict = {}
+
 	for index, row in feature_list.iterrows():
 		while pd.to_datetime(ng_prices['response']['data'][ng_idx]['period']) < row['date']:
 			ng_idx += 1
