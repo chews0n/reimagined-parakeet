@@ -50,9 +50,10 @@ class DownloadWeatherData:
             df = pd.read_csv(response, parse_dates=['Date/Time'])
             
             # convert numeric columns (e.g., temperatures, precipitation)
-            numeric_columns = ['Max Temp (°C)', 'Min Temp (°C)', 'Mean Temp (°C)', 'Total Rain (mm)', 'Total Snow (cm)', 'Total Precip (mm)', 'Snow on Grnd (cm)']
+            numeric_columns = ['Max Temp (°C)', 'Min Temp (°C)', 'Mean Temp (°C)', 'Total Rain (mm)', 'Total Snow (cm)', 'Total Precip (mm)', 'Snow on Grnd (cm)', 'Spd of Max Gust (km/h)']
             for col in numeric_columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')            
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+            df.fillna(0.0, inplace=True)
             data_frames.append(df)
 
         combined_data_frames = pd.concat(data_frames, ignore_index=True)
