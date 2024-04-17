@@ -184,4 +184,4 @@ def train(startyear, endyear, picklefilename):
 
 	print(f'Model accuracy is: {elecModel.r2_score}')
 
-	return 0
+	return elecModel.r2_score
