@@ -43,7 +43,7 @@ class MLModel:
 		self.feature_importance = self.model.feature_importances_
 
 	def get_model_predictions(self, X_list):
-		yvals = self.model.predict(X_list)
+		yvals = self.model.predict(self.scaler.transform(X_list))
 
 		return yvals
 
