@@ -12,6 +12,10 @@ def load_pickle(filename):
 	with open(filename, 'rb') as f:
 		return cPickle.load(f)
 
+def save_pickle(filename, obj):
+	f = open(filename, 'wb')
+	cPickle.dump(obj, f, 2)
+	f.close()
 
 def train(startyear, endyear, picklefilename):
 	if AESO_API_KEY == '':
@@ -174,7 +178,7 @@ def train(startyear, endyear, picklefilename):
 
 	elecModel = MLModel(Xvals=feature_list.loc[:, features], Yvals=pd.DataFrame(feature_list.loc[:, 'pool_price']), feature_names=features)
 
-	elecModel.save_pickle(picklefilename)
+	save_pickle(picklefilename, elecModel)
 
 	elecModel.plot_feature_importance()
 

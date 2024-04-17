@@ -47,11 +47,6 @@ class MLModel:
 
 		return yvals
 
-	def save_pickle(self, filename):
-		f = open(filename, 'wb')
-		cPickle.dump(self.__dict__, f, 2)
-		f.close()
-
 	def plot_feature_importance(self):
 		# sort features according to importance
 		sorted_idx = np.argsort(self.feature_importance)
