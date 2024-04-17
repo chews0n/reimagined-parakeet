@@ -9,7 +9,7 @@ import _pickle as cPickle
 
 
 def load_pickle(filename):
-	with open(filename, 'wb') as f:
+	with open(filename, 'rb') as f:
 		return cPickle.load(f)
 
 
