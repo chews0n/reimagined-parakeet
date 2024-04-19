@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Prediction <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/results">Results</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/train">Training</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+<!-- Modal -->
+<div class="modal fade" id="retrainModal" tabindex="-1" role="dialog" aria-labelledby="retrainModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="retrainModalLabel">Retrain Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>Retraining the Model...</div>
+                <div>Model R2 Score: <span id="prediction"></span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <h1>Training</h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="start_year">Start Year</label>
+                    <input type="number" step="1" class="form-control" id="start_year" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_year">End Year</label>
+                    <input type="number" step="1" class="form-control" id="end_year" placeholder="" required>
+                </div>
+                <div class="button-box col-lg-12">
+                    <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal" data-target="#retrainModal">ReTrain</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "iris_predict_app:train_model" %}',
+            data:{
+                start_year:$('#start_year').val(),
+                end_year:$('#end_year').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+
+{% endblock %}

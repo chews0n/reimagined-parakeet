@@ -180,7 +180,7 @@ def train(startyear, endyear, picklefilename):
 
 	save_pickle(picklefilename, elecModel)
 
-	elecModel.plot_feature_importance()
+	#elecModel.plot_feature_importance()
 
 	print(f'Model accuracy is: {elecModel.r2_score}')
 

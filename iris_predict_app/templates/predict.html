@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block main %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Prediction <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/results">Results</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/train">Training</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Prediction Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Prediction Input:</h5>
+                <div>Day of Year: <span id="doy"></span></div>
+                <div>Previous Day Pool Price: <span id="pdpp"></span></div>
+                <div>Natural Gas Price: <span id="ngp"></span></div>
+                <div>Mean Temperature: <span id="mt"></span></div>
+                <div>Alberta Internal Load: <span id="ail"></span></div>
+                <div>Rolling 30 Day Average: <span id="rtda"></span></div>
+                <div>Speed of Max Gust: <span id="somg"></span></div>
+                <div>Total Precipitation: <span id="tp"></span></div>
+                <div>Is Public Holiday: <span id="iph"></span></div>
+                <h5 class="pt-3">Pool Price:</h5>
+                <div id="prediction"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="/results/" role="button">View database</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-lg-12">
+            <h1>Prediction</h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <!-- Date information group -->
+                    <fieldset class="col-lg-3 border p-2">
+                        <legend class="w-auto">Date Information</legend>
+                        <div class="form-group mx-2">
+                            <label for="day_of_year">Day of Year:</label>
+                            <input type="number" step="1" class="form-control" id="day_of_year" placeholder="1" required>
+                            <small class="form-text text-muted">Enter the day of the year as a number from 1 to 366. Day 1 is January 1st.</small>
+                        </div>
+<!--                        <div class="form-group mx-2">-->
+<!--                            <label for="is_public_holiday">Is Public Holiday:</label>-->
+<!--                            <input type="number" step="1" class="form-control" id="is_public_holiday" placeholder="0">-->
+<!--                            <small class="form-text text-muted">Enter 1 for Yes or 0 for No.</small>-->
+<!--                        </div>-->
+                        <!-- Long: I want to try making the radio button for 
+                            this input feature but it returns an error with POST.
+                            I'll try again later.-->
+                        <div class="form-group mx-2">
+                            <label>Is Public Holiday:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_public_holiday" id="holiday_yes" value="1">
+                                <label class="form-check-label" for="holiday_yes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_public_holiday" id="holiday_no" value="0" checked>
+                                <label class="form-check-label" for="holiday_no">No</label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Weather conditions group -->
+                    <fieldset class="col-lg-3 border p-2 mx-4">
+                        <legend class="w-auto">Weather Conditions</legend>
+                        <div class="form-group mx-2">
+                            <label for="mean_temp">Mean Temperature (&deg;C):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="mean_temp" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between -30 and 26.</small>
+                        </div>
+                        <div class="form-group mx-2">
+                            <label for="spd_of_max_gust">Speed of Max Gust (km/h):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="spd_of_max_gust" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between 0 and 95.</small>
+                        </div>
+                        <div class="form-group mx-2">
+                            <label for="total_precip">Total Precipitation (mm):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="total_precip" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between 0 and 59.8.</small>
+                        </div>
+                    </fieldset>
+                    
+                    <!-- Energy prices group -->
+                    <fieldset class="col-lg-3 border p-2">
+                        <legend class="w-auto">Energy Prices</legend>
+                        <div class="form-group mx-2">
+                            <label for="previous_day_pool_price">Previous Day Pool Price ($):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="previous_day_pool_price" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between 0 and 794.</small>
+                        </div>
+                        <div class="form-group mx-2">
+                            <label for="ng_price">Natural Gas Price ($/MCF):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="ng_price" placeholder="0.0" required>
+                            <small class="form-text text-muted"></small>
+                        </div>
+                        <div class="form-group mx-2">
+                            <label for="alberta_internal_load">Alberta Internal Load (MW):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="alberta_internal_load" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between 7500 and 12000.</small>
+                        </div>
+                        <div class="form-group mx-2">
+                            <label for="rolling_30day_avg">Rolling 30 Day Average Price ($):</label>
+                            <input type="number" step="0.0000000001" class="form-control" id="rolling_30day_avg" placeholder="0.0" required>
+                            <small class="form-text text-muted">Enter a number between 14 and 348.</small>
+                        </div>
+                    </fieldset>
+                </div>
+                
+                <div class="mt-3 text-left">
+                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "iris_predict_app:submit_prediction" %}',
+            data:{
+                previous_day_pool_price:$('#previous_day_pool_price').val(),
+                mean_temp:$('#mean_temp').val(),
+                rolling_30day_avg:$('#rolling_30day_avg').val(),
+                alberta_internal_load:$('#alberta_internal_load').val(),
+                ng_price:$('#ng_price').val(),
+                spd_of_max_gust:$('#spd_of_max_gust').val(),
+                day_of_year:$('#day_of_year').val(),
+                total_precip:$('#total_precip').val(),
+                is_public_holiday:$('input[name=is_public_holiday]').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+                document.getElementById("doy").innerHTML = json['day_of_year']
+                document.getElementById("pdpp").innerHTML = json['previous_day_pool_price']
+                document.getElementById("ngp").innerHTML = json['ng_price']
+                document.getElementById("mt").innerHTML = json['mean_temp']
+                document.getElementById("ail").innerHTML = json['alberta_internal_load']
+                document.getElementById("rtda").innerHTML = json['rolling_30day_avg']
+                document.getElementById("somg").innerHTML = json['spd_of_max_gust']
+                document.getElementById("tp").innerHTML = json['total_precip']
+                document.getElementById("iph").innerHTML = json['is_public_holiday']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+{% endblock %}
