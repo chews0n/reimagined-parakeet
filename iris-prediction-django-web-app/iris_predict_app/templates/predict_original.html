@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block main %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Prediction Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Prediction Input:</h5>
+                <div>Day of Year: <span id="doy"></span></div>
+                <div>Previous Day Pool Price: <span id="pdpp"></span></div>
+                <div>Natural Gas Price: <span id="ngp"></span></div>
+                <div>Mean Temperature: <span id="mt"></span></div>
+                <div>Alberta Internal Load: <span id="ail"></span></div>
+                <div>Rolling 30 Day Average: <span id="rtda"></span></div>
+                <div>Speed of Max Gust: <span id="somg"></span></div>
+                <div>Total Precipitation: <span id="tp"></span></div>
+                <div>Is Public Holiday: <span id="iph"></span></div>
+                <h5 class="pt-3">Pool Price:</h5>
+                <div id="prediction"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="/results/" role="button">View database</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <h1>Prediction</h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="day_of_year">Day of Year</label>
+                    <input type="number" step="1" class="form-control" id="day_of_year" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="previous_day_pool_price">Previous Day Pool Price</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="previous_day_pool_price" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="ng_price">Natural Gas Price</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="ng_price" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mean_temp">Mean Temperature</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="mean_temp" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="alberta_internal_load">Alberta Internal Load</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="alberta_internal_load" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="rolling_30day_avg">Rolling 30 Day Average</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="rolling_30day_avg" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="spd_of_max_gust">Speed of Max Gust</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="spd_of_max_gust" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="total_precip">Total Precipitation</label>
+                    <input type="number" step="0.0000000001" class="form-control" id="total_precip" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="is_public_holiday">Is Public Holiday</label>
+                    <input type="number" step="1" class="form-control" id="is_public_holiday" placeholder="" required>
+                </div>
+                <div class="button-box col-lg-12">
+                    <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Submit</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "iris_predict_app:submit_prediction" %}',
+            data:{
+                previous_day_pool_price:$('#previous_day_pool_price').val(),
+                mean_temp:$('#mean_temp').val(),
+                rolling_30day_avg:$('#rolling_30day_avg').val(),
+                alberta_internal_load:$('#alberta_internal_load').val(),
+                ng_price:$('#ng_price').val(),
+                spd_of_max_gust:$('#spd_of_max_gust').val(),
+                day_of_year:$('#day_of_year').val(),
+                total_precip:$('#total_precip').val(),
+                is_public_holiday:$('#is_public_holiday').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+                document.getElementById("doy").innerHTML = json['day_of_year']
+                document.getElementById("pdpp").innerHTML = json['previous_day_pool_price']
+                document.getElementById("ngp").innerHTML = json['ng_price']
+                document.getElementById("mt").innerHTML = json['mean_temp']
+                document.getElementById("ail").innerHTML = json['alberta_internal_load']
+                document.getElementById("rtda").innerHTML = json['rolling_30day_avg']
+                document.getElementById("somg").innerHTML = json['spd_of_max_gust']
+                document.getElementById("tp").innerHTML = json['total_precip']
+                document.getElementById("iph").innerHTML = json['is_public_holiday']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+{% endblock %}
