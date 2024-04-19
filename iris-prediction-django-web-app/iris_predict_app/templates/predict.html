@@ -68,14 +68,14 @@
                             <input type="number" step="1" class="form-control" id="day_of_year" placeholder="1" required>
                             <small class="form-text text-muted">Enter the day of the year as a number from 1 to 366. Day 1 is January 1st.</small>
                         </div>
-                        <div class="form-group mx-2">
-                            <label for="is_public_holiday">Is Public Holiday:</label>
-                            <input type="number" step="1" class="form-control" id="is_public_holiday" placeholder="0">
-                            <small class="form-text text-muted">Enter 1 for Yes or 0 for No.</small>
-                        </div>
+<!--                        <div class="form-group mx-2">-->
+<!--                            <label for="is_public_holiday">Is Public Holiday:</label>-->
+<!--                            <input type="number" step="1" class="form-control" id="is_public_holiday" placeholder="0">-->
+<!--                            <small class="form-text text-muted">Enter 1 for Yes or 0 for No.</small>-->
+<!--                        </div>-->
                         <!-- Long: I want to try making the radio button for 
                             this input feature but it returns an error with POST.
-                            I'll try again later.
+                            I'll try again later.-->
                         <div class="form-group mx-2">
                             <label>Is Public Holiday:</label>
                             <div class="form-check">
@@ -86,7 +86,7 @@
                                 <input class="form-check-input" type="radio" name="is_public_holiday" id="holiday_no" value="0" checked>
                                 <label class="form-check-label" for="holiday_no">No</label>
                             </div>
-                        </div> -->
+                        </div>
                     </fieldset>
 
                     <!-- Weather conditions group -->
@@ -158,7 +158,7 @@
                 spd_of_max_gust:$('#spd_of_max_gust').val(),
                 day_of_year:$('#day_of_year').val(),
                 total_precip:$('#total_precip').val(),
-                is_public_holiday:$('#is_public_holiday').val(),
+                is_public_holiday:$('input[name=is_public_holiday]').val(),
                 csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
                 action: 'post'
             },
