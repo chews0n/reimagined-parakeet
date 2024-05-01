@@ -178,10 +178,13 @@ def train(startyear, endyear, picklefilename):
 
 	elecModel = MLModel(Xvals=feature_list.loc[:, features], Yvals=pd.DataFrame(feature_list.loc[:, 'pool_price']), feature_names=features)
 
+	#elecModel.cross_validation()
+
 	save_pickle(picklefilename, elecModel)
 
 	#elecModel.plot_feature_importance()
 
-	print(f'Model accuracy is: {elecModel.r2_score}')
+	print(f'Model accuracy train is: {elecModel.r2_score_train}')
+	print(f'Model accuracy test is: {elecModel.r2_score_test}')
 
-	return elecModel.r2_score
+	return elecModel.r2_score_train
